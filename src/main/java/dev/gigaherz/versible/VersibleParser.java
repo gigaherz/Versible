@@ -66,7 +66,9 @@ public class VersibleParser
 
                                 if (c == '*')
                                 {
-                                    maxVersion = null;
+                                    minVersion = minVersion.append(VersibleVersion.of(0));
+                                    maxVersion = maxVersion.bump(maxVersion.size()-1).append(VersibleVersion.of(0));;
+                                    maxExclusive = true;
 
                                     i++;
                                     if (i < range.length())
@@ -181,15 +183,25 @@ public class VersibleParser
 
                         if (c == ',')
                         {
-                            maxVersion = parseVersionInternal(range, i + 1, range.length(), endIndex);
-                            i = endIndex[0];
-
+                            i++;
                             if (i >= range.length())
                             {
                                 throw new IllegalStateException("Unexpected end of string in version interval.");
                             }
-
                             c = range.charAt(i);
+
+                            if (Character.isLetterOrDigit(c))
+                            {
+                                maxVersion = parseVersionInternal(range, i, range.length(), endIndex);
+                                i = endIndex[0];
+
+                                if (i >= range.length())
+                                {
+                                    throw new IllegalStateException("Unexpected end of string in version interval.");
+                                }
+
+                                c = range.charAt(i);
+                            }
                         }
                         else
                         {
@@ -217,7 +229,7 @@ public class VersibleParser
                     else if (c == ',')
                     {
                         int[] endIndex = {0};
-                        minVersion = maxVersion = parseVersionInternal(range, i + 1, range.length(), endIndex);
+                        maxVersion = parseVersionInternal(range, i + 1, range.length(), endIndex);
                         i = endIndex[0];
 
                         if (i >= range.length())
@@ -294,7 +306,8 @@ public class VersibleParser
         int state = 0;
         int wordStart = start;
         int lastGood = 0;
-        loop: for(int i=start;i < end;i++)
+        int i;
+        loop: for(i=start;i < end;i++)
         {
             char c = version.charAt(i);
             switch (state)
@@ -305,11 +318,13 @@ public class VersibleParser
                     {
                         state = 1;
                         wordStart = i;
+                        lastGood = i+1;
                     }
                     else if (Character.isLetter(c))
                     {
                         state = 2;
                         wordStart = i;
+                        lastGood = i+1;
                     }
                     else
                     {
@@ -332,11 +347,6 @@ public class VersibleParser
                     }
                     else
                     {
-                        if (i == wordStart + 1)
-                        {
-                            throw new IllegalStateException("Empty version component is not allowed.");
-                        }
-
                         long number = Long.parseUnsignedLong(version, wordStart, i, 10);
                         components.add(VersibleComponent.of(number));
 
@@ -361,6 +371,7 @@ public class VersibleParser
                         }
                         else
                         {
+                            state = 0;
                             if (outIndex != null)
                             {
                                 outIndex[0] = lastGood;
@@ -381,11 +392,6 @@ public class VersibleParser
                     }
                     else
                     {
-                        if (i == wordStart + 1)
-                        {
-                            throw new IllegalStateException("Empty version component is not allowed.");
-                        }
-
                         String word = version.subSequence(wordStart, i).toString();
                         components.add(VersibleComponent.of(word));
 
@@ -410,6 +416,7 @@ public class VersibleParser
                         }
                         else
                         {
+                            state = 0;
                             if (outIndex != null)
                             {
                                 outIndex[0] = lastGood;
@@ -425,12 +432,27 @@ public class VersibleParser
             }
         }
 
+        switch (state)
+        {
+            case 1 ->
+            {
+                long number = Long.parseUnsignedLong(version, wordStart, i, 10);
+                components.add(VersibleComponent.of(number));
+            }
+            case 2 ->
+            {
+                String word = version.subSequence(wordStart, i).toString();
+                components.add(VersibleComponent.of(word));
+            }
+        }
+
         if (components.size() == 0)
         {
             throw new IllegalStateException("Version string cannot be empty.");
         }
 
-        if (outIndex != null) outIndex[0] = version.length();
+        if (outIndex != null)
+            outIndex[0] = lastGood;
         return new VersibleVersion(Collections.unmodifiableList(components));
     }
 }
