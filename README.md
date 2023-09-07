@@ -8,9 +8,22 @@ This section describes how to get started using the library. If you are only int
 
 ### How To Install
 
-This section will be updated to contain the instructions for how to add a library to your gradle build script.
+Snapshot builds are available on my personal maven repository at `https://dogforce-games.com/maven/`.
 
-For now, evaluation and testing requires building the library from source.
+```
+repositories {
+    maven {
+        url 'https://www.dogforce-games.com/maven/'
+    }
+}
+```
+
+The group id is `dev.gigaherz.versible`, the artifact id is `Versible`, and the current version is `1.0-SNAPSHOT`.
+
+```
+dependencies {
+    implementation 'dev.gigaherz.versible:Versible:1.0-SNAPSHOT'
+}
 
 ### How To Use
 
@@ -23,6 +36,8 @@ Quick reference list:
   * How to check if a version is contained in a range: Use the `VersibleRange#contains` method, such as in `range.contains(version)`.
   * How to construct a version object in code: Call the `VersibleVersion.of(...)` method. This method accepts varying parameters which can be numbers, strings, or single characters.
   * How to construct a version range in code: Call one of the static factory methods in the `VersibleRange` class, such as `VersibleRange.between(a,b)`.
+  
+A temporary javadoc location is [here](http://dogforce-games.com/versible/javadoc/dev/gigaherz/versible/VersibleParser.html) (not ensured to always be up to date with the code in this repository).
 
 ### How To Modify / Test / Contribute
 
