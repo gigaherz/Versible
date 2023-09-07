@@ -16,8 +16,17 @@ public class VersibleParser
      * Parses a version range into an object that can test versions.
      *
      * <h4>Grammar</h4>
-     * <pre>{@code
-     * TODO
+     *     <pre>{@code
+     *     <range> ::= <version>
+     *              |  <version> '.' '*'
+     *              |  <comparison-operator> <version>
+     *              |  <interval>
+     *
+     *     <comparison-operator> ::= '>=' | '>' | '<=' | '<' | '='
+     *
+     *     <interval>       ::= <left-interval> (<version> ',' <version>? | ',' <version>) <right-interval>
+     *     <left-interval>  ::= '[' | '('
+     *     <right-interval> ::= ']' | ')'
      * }</pre>
      *
      * <h4>Examples</h4>
@@ -27,7 +36,7 @@ public class VersibleParser
      *     1.*         -> [1.0,2.0)
      *     >1.0        -> (1.0,)
      *     1.0         -> [1.0,1.0]
-     *     =1.0.1         -> [1.0.1,1.0.1]
+     *     =1.0.1      -> [1.0.1,1.0.1]
      *     [1,2]       -> [1,2]
      *     (1.23,1.37) -> (1.23,1.37)
      * </pre>
