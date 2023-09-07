@@ -7,17 +7,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utilities for parsing versions and ranges. This class cannot be instantiated.
+ */
 public class VersibleParser
 {
     /**
      * Parses a version range into an object that can test versions.
-     * <p>
-     * <h2>Grammar</h2>
+     *
+     * <h4>Grammar</h4>
      * <pre>{@code
      * TODO
      * }</pre>
-     * <p>
-     * <h2>Examples</h2>
+     *
+     * <h4>Examples</h4>
      * <pre>
      *     String      -> Parses into
      *    ------------------------------------
@@ -30,7 +33,8 @@ public class VersibleParser
      * </pre>
      *
      * @param range The string containing the range to be parsed.
-     *
+     * @return The range representing the given string.
+     * @throws IllegalStateException If the string cannot be converted into a valid range.
      */
     public static VersibleRange parseRange(String range)
     {
@@ -268,8 +272,8 @@ public class VersibleParser
 
     /**
      * Parses a version string into a comparable version object.
-     * <p>
-     * <h2>Grammar</h2>
+     *
+     * <h4>Grammar</h4>
      * <pre>{@code
      *     <version> ::= <component-list> ( [+-] <component-list> )*
      *     <component-list> ::= <component> ('.'? <component>)*
@@ -277,8 +281,8 @@ public class VersibleParser
      *     <number> ::= {Digit}+
      *     <word> ::= {Letter}+
      * }</pre>
-     * <p>
-     * <h2>Examples</h2>
+     *
+     * <h4>Examples</h4>
      * <pre>
      *     String      -> Parses into
      *    ------------------------------------
@@ -291,7 +295,8 @@ public class VersibleParser
      * </pre>
      *
      * @param version The string containing the version to be parsed.
-     *
+     * @return The version representing the given string.
+     * @throws IllegalStateException If the string cannot be converted into a valid version.
      */
     @NotNull
     public static VersibleVersion parseVersion(String version)
@@ -454,5 +459,10 @@ public class VersibleParser
         if (outIndex != null)
             outIndex[0] = lastGood;
         return new VersibleVersion(Collections.unmodifiableList(components));
+    }
+
+    private VersibleParser()
+    {
+        throw new IllegalStateException("This class cannot be instantiated.");
     }
 }
