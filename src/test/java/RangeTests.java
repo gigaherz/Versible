@@ -44,6 +44,14 @@ public class RangeTests
 
         // Wildcard
         Assertions.assertEquals(r3, VersibleParser.parseRange("1.*"));
+
+        // Invalid
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange("[,]"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange(">>1"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange("-2"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange("[[a]]"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange(">1.*"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseRange("1%1"));
     }
 
     @Test
@@ -62,9 +70,11 @@ public class RangeTests
         var r9 = VersibleRange.exactly(b);
 
         // Between closed
+        Assertions.assertFalse(r1.contains(VersibleVersion.of(1)));
         Assertions.assertTrue(r1.contains(VersibleVersion.of(1,0)));
         Assertions.assertTrue(r1.contains(VersibleVersion.of(1,1)));
         Assertions.assertTrue(r1.contains(VersibleVersion.of(2,0)));
+        Assertions.assertFalse(r1.contains(VersibleVersion.of(2,0,0)));
 
         // Between open
         Assertions.assertFalse(r2.contains(VersibleVersion.of(1,0)));

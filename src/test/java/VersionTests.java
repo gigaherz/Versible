@@ -31,12 +31,29 @@ public class VersionTests
     @Test
     public void testParsing()
     {
+        // Numeric components
         Assertions.assertEquals(VersibleVersion.of(1), VersibleParser.parseVersion("1"));
         Assertions.assertEquals(VersibleVersion.of(1,0), VersibleParser.parseVersion("1.0"));
-        Assertions.assertEquals(VersibleVersion.of(1,"a"), VersibleParser.parseVersion("1a"));
         Assertions.assertEquals(VersibleVersion.of(1,0,1), VersibleParser.parseVersion("1.0.1"));
-        Assertions.assertEquals(VersibleVersion.of(1,0,'-',"alpha",1), VersibleParser.parseVersion("1.0-alpha.1"));
-        Assertions.assertEquals(VersibleVersion.of(0,0,'+',"snapshot",2,1), VersibleParser.parseVersion("0.0+snapshot2.1"));
+
+        // Alphabetic components
+        Assertions.assertEquals(VersibleVersion.of(1,"a"), VersibleParser.parseVersion("1a"));
         Assertions.assertEquals(VersibleVersion.of("b",3), VersibleParser.parseVersion("b3"));
+        Assertions.assertEquals(VersibleVersion.of("a","b"), VersibleParser.parseVersion("a.b"));
+
+        // Negative suffixes
+        Assertions.assertEquals(VersibleVersion.of(1,0,'-',"alpha",1), VersibleParser.parseVersion("1.0-alpha.1"));
+        Assertions.assertEquals(VersibleVersion.of("a",'-',"b"), VersibleParser.parseVersion("a-b"));
+
+        // Positive suffixes
+        Assertions.assertEquals(VersibleVersion.of(0,0,'+',"snapshot",2,1), VersibleParser.parseVersion("0.0+snapshot2.1"));
+        Assertions.assertEquals(VersibleVersion.of("a",'+',"b"), VersibleParser.parseVersion("a+b"));
+
+        // Invalid
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseVersion("1,1"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseVersion("1:2"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseVersion("1%1"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseVersion(".0"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> VersibleParser.parseVersion("1.*"));
     }
 }
