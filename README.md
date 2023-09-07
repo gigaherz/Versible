@@ -24,6 +24,7 @@ The group id is `dev.gigaherz.versible`, the artifact id is `Versible`, and the 
 dependencies {
     implementation 'dev.gigaherz.versible:Versible:1.0-SNAPSHOT'
 }
+```
 
 ### How To Use
 
