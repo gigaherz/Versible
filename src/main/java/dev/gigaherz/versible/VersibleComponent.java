@@ -23,7 +23,7 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
         {
             if (o instanceof Numeric n)
                 return Long.compare(this.number, n.number);
-            return o instanceof Suffix s ? (s.positive ? 1 : -1) : 1;
+            return o instanceof Suffix s ? (s.positive ? -1 : 1) : 1;
         }
 
         @Override
@@ -39,7 +39,7 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
         {
             if (o instanceof Alphabetic a)
                 return word.compareTo(a.word);
-            return -1;
+            return o instanceof Suffix s ? (s.positive ? -1 : 1) : -1;
         }
 
         @Override

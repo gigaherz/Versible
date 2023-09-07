@@ -59,14 +59,14 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
         if (minVersion != null)
         {
             int minComparison = minVersion.compareTo(version);
-            if (minComparison < 0 || (minExclusive && minComparison == 0))
+            if (minComparison > 0 || (minExclusive && minComparison == 0))
                 return false;
         }
 
         if (maxVersion != null)
         {
             int maxComparison = maxVersion.compareTo(version);
-            if (maxComparison > 0 || (maxExclusive && maxComparison == 0))
+            if (maxComparison < 0 || (maxExclusive && maxComparison == 0))
                 return false;
         }
 
