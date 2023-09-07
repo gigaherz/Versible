@@ -1,5 +1,7 @@
 package dev.gigaherz.versible;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -7,17 +9,19 @@ import java.util.function.Predicate;
 
 /**
  * Represents a version range.
- * @param minVersion The lower bound of the interval. Can be {@code null}.
- * @param minExclusive If the {@param minVersion} param is non-{@code null}, determines whether the lower bound is inclusive ({@code false}) or exclusive ({@code true}).
- * @param maxVersion The upper bound of the interval. Can be {@code null}.
- * @param maxExclusive If the {@param maxVersion} param is non-{@code null}, determines whether the upper bound is inclusive ({@code false}) or exclusive ({@code true}).
+ *
+ * @param minVersion   The lower bound of the interval. Can be {@code null}.
+ * @param minExclusive If the {@code minVersion} param is not {@code null}, determines whether the lower bound is inclusive ({@code false}) or exclusive ({@code true}). Otherwise, this parameter is ignored.
+ * @param maxVersion   The upper bound of the interval. Can be {@code null}.
+ * @param maxExclusive If the {@code maxVersion} param is not {@code null}, determines whether the upper bound is inclusive ({@code false}) or exclusive ({@code true}). Otherwise, this parameter is ignored.
  */
 public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExclusive,
                             @Nullable VersibleVersion maxVersion, boolean maxExclusive)
-    implements Predicate<VersibleVersion>
+        implements Predicate<VersibleVersion>
 {
     /**
-     * Creates a version range which matches versions between the given minimum (inclusive) and maximum (inclusive).
+     * Returns a version range which matches versions between the given minimum (inclusive) and maximum (inclusive).
+     *
      * @param min The lower bound (inclusive).
      * @param max The upperbound (inclusive).
      * @return A version range.
@@ -28,7 +32,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions between the given minimum (exclusive) and maximum (exclusive).
+     * Returns a version range which matches versions between the given minimum (exclusive) and maximum (exclusive).
+     *
      * @param min The lower bound (exclusive).
      * @param max The upperbound (exclusive).
      * @return A version range.
@@ -39,7 +44,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions between the given minimum (inclusive) and maximum (exclusive).
+     * Returns a version range which matches versions between the given minimum (inclusive) and maximum (exclusive).
+     *
      * @param min The lower bound (inclusive).
      * @param max The upperbound (exclusive).
      * @return A version range.
@@ -50,7 +56,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions between the given minimum (exclusive) and maximum (inclusive).
+     * Returns a version range which matches versions between the given minimum (exclusive) and maximum (inclusive).
+     *
      * @param min The lower bound (exclusive).
      * @param max The upperbound (inclusive).
      * @return A version range.
@@ -61,7 +68,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions greater or equal to the given minimum.
+     * Returns a version range which matches versions greater or equal to the given minimum.
+     *
      * @param min The version to compare against.
      * @return A version range.
      */
@@ -71,7 +79,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions strictly greater than the given minimum.
+     * Returns a version range which matches versions strictly greater than the given minimum.
+     *
      * @param min The version to compare against.
      * @return A version range.
      */
@@ -81,7 +90,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions less or equal to the given maximum.
+     * Returns a version range which matches versions less or equal to the given maximum.
+     *
      * @param max The version to compare against.
      * @return A version range.
      */
@@ -91,7 +101,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches versions strictly less than the given maximum.
+     * Returns a version range which matches versions strictly less than the given maximum.
+     *
      * @param max The version to compare against.
      * @return A version range.
      */
@@ -101,7 +112,8 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
-     * Creates a version range which matches a given version exactly.
+     * Returns a version range which matches a given version exactly.
+     *
      * @param version The version to match.
      * @return A version range.
      */
@@ -111,7 +123,25 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
+     * Constructs a version range.
+     *
+     * @param minVersion   The lower bound of the interval. Can be {@code null}.
+     * @param minExclusive If the {@code minVersion} param is not {@code null}, determines whether the lower bound is inclusive ({@code false}) or exclusive ({@code true}). Otherwise, this parameter is ignored.
+     * @param maxVersion   The upper bound of the interval. Can be {@code null}.
+     * @param maxExclusive If the {@code maxVersion} param is not {@code null}, determines whether the upper bound is inclusive ({@code false}) or exclusive ({@code true}). Otherwise, this parameter is ignored.
+     * @throws IllegalArgumentException If {@code minVersion} and {@code maxVersion} are both {@code null} at the same time.
+     */
+    @Contract("null, _, null, _ -> fail")
+    @ApiStatus.Internal
+    public VersibleRange
+    {
+        if (minVersion == null && maxVersion == null)
+            throw new IllegalArgumentException("Cannot construct a range with no ends. Either minVersion or maxVersion must be non-null");
+    }
+
+    /**
      * Checks if a given version is included in the range.
+     *
      * @param version The version to check.
      * @return {@code true} if the version is included, {@code false} othersie.
      */
@@ -162,5 +192,30 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
         if (minVersion != null)
             hash = hash * 31 + Objects.hash(maxVersion, maxExclusive);
         return hash;
+    }
+
+    @Override
+    public String toString()
+    {
+        if (minVersion != null && maxVersion != null)
+        {
+            var open = minExclusive ? "(" : "[";
+            var close = minExclusive ? ")" : "]";
+            return open + minVersion + "," + maxVersion + close;
+        }
+        else if (minVersion != null)
+        {
+            var open = minExclusive ? "(" : "[";
+            return open + minVersion + ",)";
+        }
+        else if (maxVersion != null)
+        {
+            var close = minExclusive ? ")" : "]";
+            return "(," + maxVersion + close;
+        }
+        else
+        {
+            return "(invalid)";
+        }
     }
 }

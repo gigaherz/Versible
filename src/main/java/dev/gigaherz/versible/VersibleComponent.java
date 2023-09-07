@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
 public interface VersibleComponent extends Comparable<VersibleComponent>
 {
     /**
-     * Creates a numeric component from the given number. The number should be positive.
+     * Returns a numeric component with the given number. The number must be positive or zero.
+     *
      * @param number The number to use for the numeric component.
      * @return A numeric component with the corresponding number.
      */
@@ -18,7 +19,8 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
     }
 
     /**
-     * Creates an alphabetic component from the given string. The string should only contain letters.
+     * Returns an alphabetic component with the given string. The string must only contain letters.
+     *
      * @param word The word to use for the alphabetic component
      * @return An alphabetic component with the corresponding word.
      */
@@ -28,7 +30,8 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
     }
 
     /**
-     * Creates a suffix component for the corresponding positive/negative tag type.
+     * Returns a suffix component for the corresponding positive/negative tag type.
+     *
      * @param positive Whether the tag type is positive {@code true} or negetive {@code false}.
      * @return A suffix component with the corresponding tag type.
      */
@@ -40,7 +43,20 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
     /**
      * Represents a numeric component.
      */
-    record Numeric(long number) implements VersibleComponent {
+    record Numeric(long number) implements VersibleComponent
+    {
+
+        /**
+         * Constructs a numeric component.
+         *
+         * @param number A positive number or zero.
+         */
+        public Numeric
+        {
+            if (number < 0)
+                throw new IllegalArgumentException("The number cannot be negative");
+        }
+
         @Override
         public int compareTo(@NotNull VersibleComponent o)
         {
@@ -59,7 +75,23 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
     /**
      * Represents an alphabetic component.
      */
-    record Alphabetic(String word) implements VersibleComponent {
+    record Alphabetic(String word) implements VersibleComponent
+    {
+
+        /**
+         * Constructs an alphabetic component.
+         *
+         * @param word A string containing only letters.
+         */
+        public Alphabetic
+        {
+            for (int i = 0; i < word.length(); i++)
+            {
+                if (!Character.isLetter(word.charAt(i)))
+                    throw new IllegalArgumentException("The word must consist only of letters");
+            }
+        }
+
         @Override
         public int compareTo(@NotNull VersibleComponent o)
         {
@@ -78,7 +110,8 @@ public interface VersibleComponent extends Comparable<VersibleComponent>
     /**
      * A component that represents the start of a suffix tag.
      */
-    record Suffix(boolean positive) implements VersibleComponent {
+    record Suffix(boolean positive) implements VersibleComponent
+    {
 
         @Override
         public int compareTo(@NotNull VersibleComponent o)

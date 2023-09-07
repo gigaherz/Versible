@@ -16,7 +16,7 @@ public class VersibleParser
      * Parses a version range into an object that can test versions.
      *
      * <h4>Grammar</h4>
-     *     <pre>{@code
+     * <pre>{@code
      *     <range> ::= <version>
      *              |  <version> '.' '*'
      *              |  <comparison-operator> <version>
@@ -43,7 +43,7 @@ public class VersibleParser
      *
      * @param range The string containing the range to be parsed.
      * @return The range representing the given string.
-     * @throws IllegalStateException If the string cannot be converted into a valid range.
+     * @throws IllegalArgumentException If the string cannot be converted into a valid range.
      */
     public static VersibleRange parseRange(String range)
     {
@@ -52,10 +52,11 @@ public class VersibleParser
         VersibleVersion maxVersion = null;
         boolean minExclusive = false;
         boolean maxExclusive = false;
-        loop: for(int i=0;i<range.length();i++)
+        loop:
+        for (int i = 0; i < range.length(); i++)
         {
             var c = range.charAt(i);
-            switch(state)
+            switch (state)
             {
                 case 0: // start
                     if (Character.isLetterOrDigit(c))
@@ -72,7 +73,7 @@ public class VersibleParser
 
                                 if (i >= range.length())
                                 {
-                                    throw new IllegalStateException("Unexpected end of string in version pattern.");
+                                    throw new IllegalArgumentException("Unexpected end of string in version pattern.");
                                 }
 
                                 c = range.charAt(i);
@@ -80,7 +81,8 @@ public class VersibleParser
                                 if (c == '*')
                                 {
                                     minVersion = minVersion.append(VersibleVersion.of(0));
-                                    maxVersion = maxVersion.bump(maxVersion.size()-1).append(VersibleVersion.of(0));;
+                                    maxVersion = maxVersion.bump(maxVersion.size() - 1).append(VersibleVersion.of(0));
+                                    ;
                                     maxExclusive = true;
 
                                     i++;
@@ -88,17 +90,17 @@ public class VersibleParser
                                     {
                                         c = range.charAt(i);
 
-                                        throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                                        throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                                     }
                                 }
                                 else
                                 {
-                                    throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                                    throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                                 }
                             }
                             else
                             {
-                                throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                                throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                             }
                         }
                         break loop;
@@ -107,36 +109,36 @@ public class VersibleParser
                     {
                         state = 1;
                     }
-                    else if(c == '<')
+                    else if (c == '<')
                     {
                         state = 2;
                     }
-                    else if(c == '=')
+                    else if (c == '=')
                     {
                         state = 3;
                     }
-                    else if(c == '(')
+                    else if (c == '(')
                     {
                         state = 6;
                         minExclusive = true;
                     }
-                    else if(c == '[')
+                    else if (c == '[')
                     {
                         state = 6;
                     }
                     else
                     {
-                        throw new IllegalStateException("Unexpected character '" + c + "' in version range.");
+                        throw new IllegalArgumentException("Unexpected character '" + c + "' in version range.");
                     }
                     break;
-                case 1,2: // single version relative (partial)
+                case 1, 2: // single version relative (partial)
                     if (c == '=')
                     {
                         state = state + 3;
                         break;
                     }
                     /* fallthrough */
-                case 3,4,5: // single version relative
+                case 3, 4, 5: // single version relative
                     if (Character.isLetterOrDigit(c))
                     {
                         int[] endIndex = {0};
@@ -145,7 +147,7 @@ public class VersibleParser
                         if (i < range.length())
                         {
                             c = range.charAt(i);
-                            throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                         }
 
                         switch (state)
@@ -178,7 +180,7 @@ public class VersibleParser
                     }
                     else
                     {
-                        throw new IllegalStateException("Unexpected character '" + c + "' in version range.");
+                        throw new IllegalArgumentException("Unexpected character '" + c + "' in version range.");
                     }
                 case 6: // interval start
                     if (Character.isLetterOrDigit(c))
@@ -189,7 +191,7 @@ public class VersibleParser
 
                         if (i >= range.length())
                         {
-                            throw new IllegalStateException("Unexpected end of string in version interval.");
+                            throw new IllegalArgumentException("Unexpected end of string in version interval.");
                         }
 
                         c = range.charAt(i);
@@ -199,7 +201,7 @@ public class VersibleParser
                             i++;
                             if (i >= range.length())
                             {
-                                throw new IllegalStateException("Unexpected end of string in version interval.");
+                                throw new IllegalArgumentException("Unexpected end of string in version interval.");
                             }
                             c = range.charAt(i);
 
@@ -210,7 +212,7 @@ public class VersibleParser
 
                                 if (i >= range.length())
                                 {
-                                    throw new IllegalStateException("Unexpected end of string in version interval.");
+                                    throw new IllegalArgumentException("Unexpected end of string in version interval.");
                                 }
 
                                 c = range.charAt(i);
@@ -227,14 +229,14 @@ public class VersibleParser
                         }
                         else if (c != ']')
                         {
-                            throw new IllegalStateException("Unexpected character '" + c + "' in version interval.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' in version interval.");
                         }
 
                         i++;
                         if (i < range.length())
                         {
                             c = range.charAt(i);
-                            throw new IllegalStateException("Unexpected character '" + c + "' after version interval.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' after version interval.");
                         }
 
                         break loop;
@@ -247,7 +249,7 @@ public class VersibleParser
 
                         if (i >= range.length())
                         {
-                            throw new IllegalStateException("Unexpected end of string in version interval.");
+                            throw new IllegalArgumentException("Unexpected end of string in version interval.");
                         }
 
                         c = range.charAt(i);
@@ -258,21 +260,21 @@ public class VersibleParser
                         }
                         else if (c != ']')
                         {
-                            throw new IllegalStateException("Unexpected character '" + c + "' in version interval.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' in version interval.");
                         }
 
                         i++;
                         if (i < range.length())
                         {
                             c = range.charAt(i);
-                            throw new IllegalStateException("Unexpected character '" + c + "' after version interval.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' after version interval.");
                         }
 
                         break loop;
                     }
                     else
                     {
-                        throw new IllegalStateException("Unexpected character '" + c + "' in version interval.");
+                        throw new IllegalArgumentException("Unexpected character '" + c + "' in version interval.");
                     }
             }
         }
@@ -305,7 +307,7 @@ public class VersibleParser
      *
      * @param version The string containing the version to be parsed.
      * @return The version representing the given string.
-     * @throws IllegalStateException If the string cannot be converted into a valid version.
+     * @throws IllegalArgumentException If the string cannot be converted into a valid version.
      */
     @NotNull
     public static VersibleVersion parseVersion(String version)
@@ -321,7 +323,8 @@ public class VersibleParser
         int wordStart = start;
         int lastGood = 0;
         int i;
-        loop: for(i=start;i < end;i++)
+        loop:
+        for (i = start; i < end; i++)
         {
             char c = version.charAt(i);
             switch (state)
@@ -332,13 +335,13 @@ public class VersibleParser
                     {
                         state = 1;
                         wordStart = i;
-                        lastGood = i+1;
+                        lastGood = i + 1;
                     }
                     else if (Character.isLetter(c))
                     {
                         state = 2;
                         wordStart = i;
-                        lastGood = i+1;
+                        lastGood = i + 1;
                     }
                     else
                     {
@@ -349,7 +352,7 @@ public class VersibleParser
                         }
                         else
                         {
-                            throw new IllegalStateException("Unexpected character '" + c + "' at the start of a version component.");
+                            throw new IllegalArgumentException("Unexpected character '" + c + "' at the start of a version component.");
                         }
                     }
                 }
@@ -357,7 +360,7 @@ public class VersibleParser
                 {
                     if (Character.isDigit(c))
                     {
-                        lastGood = i+1;
+                        lastGood = i + 1;
                     }
                     else
                     {
@@ -393,7 +396,7 @@ public class VersibleParser
                             }
                             else
                             {
-                                throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                                throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                             }
                         }
                     }
@@ -402,7 +405,7 @@ public class VersibleParser
                 {
                     if (Character.isLetter(c))
                     {
-                        lastGood = i+1;
+                        lastGood = i + 1;
                     }
                     else
                     {
@@ -438,7 +441,7 @@ public class VersibleParser
                             }
                             else
                             {
-                                throw new IllegalStateException("Unexpected character '" + c + "' in version component.");
+                                throw new IllegalArgumentException("Unexpected character '" + c + "' in version component.");
                             }
                         }
                     }
@@ -462,7 +465,7 @@ public class VersibleParser
 
         if (components.size() == 0)
         {
-            throw new IllegalStateException("Version string cannot be empty.");
+            throw new IllegalArgumentException("Version string cannot be empty.");
         }
 
         if (outIndex != null)
@@ -472,6 +475,6 @@ public class VersibleParser
 
     private VersibleParser()
     {
-        throw new IllegalStateException("This class cannot be instantiated.");
+        throw new IllegalArgumentException("This class cannot be instantiated.");
     }
 }
