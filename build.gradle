@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'org.ajoberstar.grgit' version '5.2.0'
 }
 
 group = 'dev.gigaherz.versible'
@@ -21,30 +22,17 @@ test {
     useJUnitPlatform()
 }
 
-tasks.register('sourcesJar', Jar) {
-    dependsOn classes
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
-    from('/') {
-        include 'LICENSE.txt'
-    }
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
-tasks.register('javadocJar', Jar) {
-    dependsOn javadoc
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
+tasks.named('sourcesJar') {
+    from(project.file("LICENSE.txt"))
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-jar {
-    from('/') {
-        include 'LICENSE.txt'
-    }
+tasks.named('jar') {
+    from(project.file("LICENSE.txt"))
 
     manifest {
         attributes([
@@ -54,9 +42,25 @@ jar {
                 "Implementation-Title": "versible",
                 "Implementation-Version": project.version,
                 "Implementation-Vendor" :"gigaherz",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "Automatic-Module-Name": project.group
+                "Implementation-Timestamp": grgit.head().dateTime.format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "Automatic-Module-Name": project.group,
+                "Source-Repository": "https://github.com/gigaherz/Versible",
+                "Git-Commit": grgit.head().id
         ])
+    }
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+tasks.named('publish') {
+    doFirst {
+        if (!grgit.status().isClean())
+        {
+            throw new IllegalStateException("Commit first!");
+        }
     }
 }
 
