@@ -76,7 +76,7 @@ A version range can be expressed in various ways, depending on the user's needs.
 
 The following are considered valid for the purposes of this specification:
 
-  * **A single version**: A range can be a single version string, which will be considered to match only the given version exactly.
+  * **A single version**: A range can be a single version string, which will be considered to match only the given version *approximately* (meaning, `1.0` matches the range `[1.0,1.1)`).
   * **An interval**: A range can use the interval notation, where square brackets `[]` denote a closed (includive) end, and parentheses `()` denote an open (exclusive) end. Eg. `[1,2)` will include versions that compare greater than `1` up to and excluding `2`. Intervals can be single-ended on either end (eg. `[1.0,)` or `(,2.0]`), which includes any possible version beyond the specified end.
   * **A comparison**: A range can specify a single-ended interval by specifying one of the comparison operators `>=` (at least), `>` (greater than), `<=` (at most), `<` (lesser than). Eg. `>=1.0.2` is equivalent to the single-ended interval `[1.0.2,)`.
   * **An equivalence**: Although identical to the single version option, the operator `=` can be used to emphasize that a version matching is strictly equal.
