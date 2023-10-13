@@ -112,6 +112,20 @@ public record VersibleRange(@Nullable VersibleVersion minVersion, boolean minExc
     }
 
     /**
+     * Returns a version range which matches a given version with optional '+' suffix.
+     *
+     * @param version The version to match.
+     * @return A version range.
+     */
+    public static VersibleRange approximately(VersibleVersion version)
+    {
+        if (version.get(version.size() - 1) instanceof VersibleComponent.Numeric)
+            return new VersibleRange(version, false, version.append(0, '-'), false);
+        else
+            return exactly(version);
+    }
+
+    /**
      * Returns a version range which matches a given version exactly.
      *
      * @param version The version to match.

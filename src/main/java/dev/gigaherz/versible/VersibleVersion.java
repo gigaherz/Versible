@@ -4,6 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -23,35 +24,7 @@ public record VersibleVersion(@NotNull List<VersibleComponent> components) imple
     public static VersibleVersion of(Object... components)
     {
         List<VersibleComponent> componentList = new ArrayList<>();
-        for (var obj : components)
-        {
-            if (obj instanceof Number n)
-                componentList.add(VersibleComponent.of(n.longValue()));
-            else if (obj instanceof String s)
-            {
-                if (s.equals("+"))
-                    componentList.add(VersibleComponent.suffix(true));
-                else if (s.equals("-"))
-                    componentList.add(VersibleComponent.suffix(false));
-                else
-                    componentList.add(VersibleComponent.of(s));
-            }
-            else if (obj instanceof Character c)
-            {
-                if (c == '+')
-                    componentList.add(VersibleComponent.suffix(true));
-                else if (c == '-')
-                    componentList.add(VersibleComponent.suffix(false));
-                else
-                    componentList.add(VersibleComponent.of(c.toString()));
-            }
-            else if (obj instanceof VersibleVersion v)
-                componentList.addAll(v.components);
-            else
-            {
-                throw new IllegalArgumentException("Cannot construct version component from " + obj.getClass().getName());
-            }
-        }
+        appendArray(componentList, components);
         return new VersibleVersion(Collections.unmodifiableList(componentList));
     }
 
@@ -133,9 +106,23 @@ public record VersibleVersion(@NotNull List<VersibleComponent> components) imple
      */
     public VersibleVersion append(VersibleVersion other)
     {
-        List<VersibleComponent> mergedComponents = new ArrayList<>();
+        List<VersibleComponent> mergedComponents = new ArrayList<>(components.size() + other.components.size());
         mergedComponents.addAll(components);
         mergedComponents.addAll(other.components);
+        return new VersibleVersion(Collections.unmodifiableList(mergedComponents));
+    }
+
+    /**
+     * Returns a new {@link VersibleVersion} with the components of another version concatenated after the components of this version.
+     *
+     * @param other The version to append components from.
+     * @return The version with the concatenated components.
+     */
+    public VersibleVersion append(Object... other)
+    {
+        List<VersibleComponent> mergedComponents = new ArrayList<>(components.size() + other.length);
+        mergedComponents.addAll(components);
+        appendArray(mergedComponents, other);
         return new VersibleVersion(Collections.unmodifiableList(mergedComponents));
     }
 
@@ -188,5 +175,40 @@ public record VersibleVersion(@NotNull List<VersibleComponent> components) imple
             }
         }
         return b.toString();
+    }
+
+    private static void appendArray(List<VersibleComponent> componentList, Object[] components)
+    {
+        for (var obj : components)
+        {
+            if (obj instanceof Number n)
+                componentList.add(VersibleComponent.of(n.longValue()));
+            else if (obj instanceof String s)
+            {
+                if (s.equals("+"))
+                    componentList.add(VersibleComponent.suffix(true));
+                else if (s.equals("-"))
+                    componentList.add(VersibleComponent.suffix(false));
+                else
+                    componentList.add(VersibleComponent.of(s));
+            }
+            else if (obj instanceof Character c)
+            {
+                if (c == '+')
+                    componentList.add(VersibleComponent.suffix(true));
+                else if (c == '-')
+                    componentList.add(VersibleComponent.suffix(false));
+                else
+                    componentList.add(VersibleComponent.of(c.toString()));
+            }
+            else if (obj instanceof VersibleVersion v)
+                componentList.addAll(v.components);
+            else if (obj instanceof VersibleComponent c)
+                componentList.add(c);
+            else
+            {
+                throw new IllegalArgumentException("Cannot construct version component from " + obj.getClass().getName());
+            }
+        }
     }
 }

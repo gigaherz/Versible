@@ -35,7 +35,7 @@ public class VersibleParser
      *    ------------------------------------
      *     1.*         -> [1.0,2.0)
      *     >1.0        -> (1.0,)
-     *     1.0         -> [1.0,1.0]
+     *     1.0         -> [1.0,1.1-a)
      *     =1.0.1      -> [1.0.1,1.0.1]
      *     [1,2]       -> [1,2]
      *     (1.23,1.37) -> (1.23,1.37)
@@ -62,7 +62,8 @@ public class VersibleParser
                     if (Character.isLetterOrDigit(c))
                     {
                         int[] endIndex = {0};
-                        minVersion = maxVersion = parseVersionInternal(range, i, range.length(), endIndex);
+                        minVersion = parseVersionInternal(range, i, range.length(), endIndex);
+                        maxVersion = minVersion.append(0, '-');
                         i = endIndex[0];
                         if (i < range.length())
                         {
@@ -80,8 +81,8 @@ public class VersibleParser
 
                                 if (c == '*')
                                 {
-                                    minVersion = minVersion.append(VersibleVersion.of(0));
-                                    maxVersion = maxVersion.bump(maxVersion.size() - 1).append(VersibleVersion.of(0));
+                                    maxVersion = minVersion.bump(minVersion.size() - 1).append(0);
+                                    minVersion = minVersion.append(0);
                                     ;
                                     maxExclusive = true;
 

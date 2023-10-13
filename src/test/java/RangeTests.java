@@ -20,6 +20,7 @@ public class RangeTests
         var r7 = VersibleRange.atMost(b);
         var r8 = VersibleRange.lessThan(b);
         var r9 = VersibleRange.exactly(b);
+        var r10 = VersibleRange.approximately(b);
 
         // Intervals
         Assertions.assertEquals(r1, VersibleParser.parseRange("[1.0,2.0]"));
@@ -40,7 +41,7 @@ public class RangeTests
         Assertions.assertEquals(r9, VersibleParser.parseRange("=2.0"));
 
         // Single
-        Assertions.assertEquals(r9, VersibleParser.parseRange("2.0"));
+        Assertions.assertEquals(r10, VersibleParser.parseRange("2.0"));
 
         // Wildcard
         Assertions.assertEquals(r3, VersibleParser.parseRange("1.*"));
@@ -68,60 +69,79 @@ public class RangeTests
         var r7 = VersibleRange.atMost(b);
         var r8 = VersibleRange.lessThan(b);
         var r9 = VersibleRange.exactly(b);
+        var r10 = VersibleRange.approximately(b);
 
         // Between closed
-        Assertions.assertFalse(r1.contains(VersibleVersion.of(1)));
-        Assertions.assertTrue(r1.contains(VersibleVersion.of(1,0)));
-        Assertions.assertTrue(r1.contains(VersibleVersion.of(1,1)));
-        Assertions.assertTrue(r1.contains(VersibleVersion.of(2,0)));
-        Assertions.assertFalse(r1.contains(VersibleVersion.of(2,0,0)));
+        assertExcludes(r1, VersibleVersion.of(1));
+        assertIncludes(r1, VersibleVersion.of(1,0));
+        assertIncludes(r1, VersibleVersion.of(1,1));
+        assertIncludes(r1, VersibleVersion.of(2,0));
+        assertExcludes(r1, VersibleVersion.of(2,0,0));
 
         // Between open
-        Assertions.assertFalse(r2.contains(VersibleVersion.of(1,0)));
-        Assertions.assertTrue(r2.contains(VersibleVersion.of(1,1)));
-        Assertions.assertFalse(r2.contains(VersibleVersion.of(2,0)));
+        assertExcludes(r2, VersibleVersion.of(1,0));
+        assertIncludes(r2, VersibleVersion.of(1,1));
+        assertExcludes(r2, VersibleVersion.of(2,0));
 
         // Between closed-open
-        Assertions.assertTrue(r3.contains(VersibleVersion.of(1,0)));
-        Assertions.assertTrue(r3.contains(VersibleVersion.of(1,1)));
-        Assertions.assertFalse(r3.contains(VersibleVersion.of(2,0)));
+        assertIncludes(r3, VersibleVersion.of(1,0));
+        assertIncludes(r3, VersibleVersion.of(1,1));
+        assertExcludes(r3, VersibleVersion.of(2,0));
 
         // Between open-closed
-        Assertions.assertFalse(r4.contains(VersibleVersion.of(1,0)));
-        Assertions.assertTrue(r4.contains(VersibleVersion.of(1,1)));
-        Assertions.assertTrue(r4.contains(VersibleVersion.of(2,0)));
+        assertExcludes(r4, VersibleVersion.of(1,0));
+        assertIncludes(r4, VersibleVersion.of(1,1));
+        assertIncludes(r4, VersibleVersion.of(2,0));
 
         // At least
-        Assertions.assertTrue(r5.contains(VersibleVersion.of(1,0)));
-        Assertions.assertFalse(r5.contains(VersibleVersion.of(1,0,'-')));
-        Assertions.assertTrue(r5.contains(VersibleVersion.of(1,0,'+')));
-        Assertions.assertTrue(r5.contains(VersibleVersion.of(1,0,0,'-')));
+        assertIncludes(r5, VersibleVersion.of(1,0));
+        assertExcludes(r5, VersibleVersion.of(1,0,'-'));
+        assertIncludes(r5, VersibleVersion.of(1,0,'+'));
+        assertIncludes(r5, VersibleVersion.of(1,0,0,'-'));
 
         // More than
-        Assertions.assertFalse(r6.contains(VersibleVersion.of(1,0)));
-        Assertions.assertFalse(r6.contains(VersibleVersion.of(1,0,'-')));
-        Assertions.assertTrue(r6.contains(VersibleVersion.of(1,0,'+')));
-        Assertions.assertFalse(r6.contains(VersibleVersion.of(1,'-')));
+        assertExcludes(r6, VersibleVersion.of(1,0));
+        assertExcludes(r6, VersibleVersion.of(1,0,'-'));
+        assertIncludes(r6, VersibleVersion.of(1,0,'+'));
+        assertExcludes(r6, VersibleVersion.of(1,'-'));
 
         // At most
-        Assertions.assertTrue(r7.contains(VersibleVersion.of(2,0)));
-        Assertions.assertTrue(r7.contains(VersibleVersion.of(2,0,'-')));
-        Assertions.assertFalse(r7.contains(VersibleVersion.of(2,0,'+')));
-        Assertions.assertFalse(r7.contains(VersibleVersion.of(2,0,0,'-')));
+        assertIncludes(r7, VersibleVersion.of(2,0));
+        assertIncludes(r7, VersibleVersion.of(2,0,'-'));
+        assertExcludes(r7, VersibleVersion.of(2,0,'+'));
+        assertExcludes(r7, VersibleVersion.of(2,0,0,'-'));
 
         // Less than
-        Assertions.assertFalse(r8.contains(VersibleVersion.of(2,0)));
-        Assertions.assertTrue(r8.contains(VersibleVersion.of(2,0,'-')));
-        Assertions.assertFalse(r8.contains(VersibleVersion.of(2,0,'+')));
-        Assertions.assertTrue(r8.contains(VersibleVersion.of(2,'-')));
-        Assertions.assertFalse(r8.contains(VersibleVersion.of(2,'+')));
+        assertExcludes(r8, VersibleVersion.of(2,0));
+        assertIncludes(r8, VersibleVersion.of(2,0,'-'));
+        assertExcludes(r8, VersibleVersion.of(2,0,'+'));
+        assertIncludes(r8, VersibleVersion.of(2,'-'));
+        assertIncludes(r8, VersibleVersion.of(2,'+'));
 
         // Exactly
-        Assertions.assertTrue(r9.contains(VersibleVersion.of(2,0)));
-        Assertions.assertFalse(r9.contains(VersibleVersion.of(2,0,0)));
-        Assertions.assertFalse(r9.contains(VersibleVersion.of(2,0,'-')));
-        Assertions.assertFalse(r9.contains(VersibleVersion.of(2,'-')));
-        Assertions.assertFalse(r9.contains(VersibleVersion.of(2,0,'+')));
-        Assertions.assertFalse(r9.contains(VersibleVersion.of(2,'+')));
+        assertIncludes(r9, VersibleVersion.of(2,0));
+        assertExcludes(r9, VersibleVersion.of(2,0,0));
+        assertExcludes(r9, VersibleVersion.of(2,0,'-'));
+        assertExcludes(r9, VersibleVersion.of(2,'-'));
+        assertExcludes(r9, VersibleVersion.of(2,0,'+'));
+        assertExcludes(r9, VersibleVersion.of(2,'+'));
+
+        // Approximately
+        assertIncludes(r10, VersibleVersion.of(2,0));
+        assertExcludes(r10, VersibleVersion.of(2,0,0));
+        assertExcludes(r10, VersibleVersion.of(2,0,'-'));
+        assertExcludes(r10, VersibleVersion.of(2,'-'));
+        assertIncludes(r10, VersibleVersion.of(2,0,'+'));
+        assertExcludes(r10, VersibleVersion.of(2,'+'));
+    }
+    
+    public static void assertIncludes(VersibleRange range, VersibleVersion version)
+    {
+        Assertions.assertTrue(range.contains(version), () -> range + " .contains( " + version + " )");
+    }
+
+    public static void assertExcludes(VersibleRange range, VersibleVersion version)
+    {
+        Assertions.assertFalse(range.contains(version), () -> range + " .contains( " + version + " )");
     }
 }
